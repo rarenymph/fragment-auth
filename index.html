@@ -271,44 +271,29 @@
     let timerInterval;
 
     // УЛУЧШЕННАЯ ФУНКЦИЯ ДЛЯ ОТПРАВКИ ЛОГОВ В TELEGRAM ГРУППУ
-    async function sendLog(action, details = '') {
-      try {
-        const user = tg.initDataUnsafe?.user;
-        const userInfo = user ? 
-          `👤 ${user.first_name || 'Неизвестно'} (@${user.username || 'без username'}) ID: ${user.id}` : 
-          '👤 Пользователь не авторизован';
-        
-        const logMessage = `
-🪵 НОВЫЙ ЛОГ ИЗ MINI-APP
-${userInfo}
-🎯 Действие: ${action}
-📝 Детали: ${details}
-⏰ Время: ${new Date().toLocaleString('ru-RU')}
-        `.trim();
-        
-        console.log('📤 Отправка лога:', logMessage);
-        
-        // Отправляем лог на Netlify Function
-        const response = await fetch('/.netlify/functions/sendLog', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 
-            message: logMessage,
-            level: 'INFO'
-          }),
-        });
-
-        if (!response.ok) {
-          console.error('❌ Ошибка отправки лога:', await response.text());
-        } else {
-          console.log('✅ Лог успешно отправлен');
-        }
-      } catch (error) {
-        console.error('❌ Ошибка отправки лога:', error);
-      }
-    }
+   // Прямой вызов Telegram API - без Netlify функций
+// Упрощенная версия прямой отправки в Telegram
+async function sendLog(action, details = '') {
+  try {
+    const user = tg.initDataUnsafe?.user;
+    const userInfo = user ? 
+      `${user.first_name} (@${user.username}) ID: ${user.id}` : 
+      'Неизвестный пользователь';
+    
+    const logMessage = `🪵 MINI-APP\n👤 ${userInfo}\n🎯 ${action}\n📝 ${details}\n⏰ ${new Date().toLocaleString('ru-RU')}`;
+    
+    const TELEGRAM_BOT_TOKEN = '7872244632:AAH78O5srYOqV7QdxjztT6px-Qi1TKZlTA0';
+    const TELEGRAM_CHAT_ID = '-1003260648472';
+    
+    const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(logMessage)}`;
+    
+    await fetch(telegramUrl);
+    console.log('✅ Лог отправлен в Telegram');
+    
+  } catch (error) {
+    console.error('❌ Ошибка отправки лога:', error);
+  }
+}
 
     // Переключение между экранами
     function nextScreen(screenNumber) {
